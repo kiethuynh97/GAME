@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cổng Vườn Đêm 🌙</title>
+<title>Khu Vườn Của Kiệt Huỳnh 🌙</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep:#151233;
-    --bg-mid:#211c4a;
-    --tile:#2c2560;
-    --tile-edge:#3c3280;
-    --lavender:#b6a6ff;
+    --bg-deep:#0a0f28;
+    --bg-mid:#0f1c3f;
+    --tile:#152a52;
+    --tile-edge:#2c4d8c;
+    --lavender:#7fb2ff;
     --gold:#ffd37b;
-    --pink:#ff9ec4;
-    --cream:#f4efff;
-    --muted:#8d84c2;
+    --pink:#5fd6e8;
+    --cream:#eaf1ff;
+    --muted:#6f89bd;
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -24,8 +24,8 @@
     margin:0;
     min-height:100vh;
     background:
-      radial-gradient(1200px 600px at 15% -10%, #2a2470 0%, transparent 60%),
-      radial-gradient(1000px 700px at 110% 10%, #3a1f5c 0%, transparent 55%),
+      radial-gradient(1200px 600px at 15% -10%, #17297a 0%, transparent 60%),
+      radial-gradient(1000px 700px at 110% 10%, #0e3a70 0%, transparent 55%),
       linear-gradient(180deg, var(--bg-deep), var(--bg-mid));
     color:var(--cream);
     font-family:'Nunito',sans-serif;
@@ -40,6 +40,54 @@
   .star{position:absolute;background:#fff;border-radius:50%;opacity:.5;animation:twinkle 3s ease-in-out infinite;}
   @keyframes twinkle{0%,100%{opacity:.15;}50%{opacity:.8;}}
 
+  /* ---------- Ambient always-animating decorations (no mouse needed) ---------- */
+  .ambient-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+
+  .firefly{position:fixed;border-radius:50%;background:#ffe9a8;box-shadow:0 0 10px 3px rgba(255,233,168,.55);opacity:.75;}
+  .firefly.f1{width:5px;height:5px;top:20%;left:8%;animation:fireflyDrift1 9s ease-in-out infinite;}
+  .firefly.f2{width:4px;height:4px;top:60%;left:80%;animation:fireflyDrift2 11s ease-in-out infinite;}
+  .firefly.f3{width:6px;height:6px;top:75%;left:15%;animation:fireflyDrift3 8s ease-in-out infinite;}
+  .firefly.f4{width:4px;height:4px;top:35%;left:88%;animation:fireflyDrift1 12s ease-in-out infinite reverse;}
+  .firefly.f5{width:5px;height:5px;top:12%;left:45%;animation:fireflyDrift2 10s ease-in-out infinite;}
+  @keyframes fireflyDrift1{
+    0%,100%{transform:translate(0,0);opacity:.3;}
+    25%{transform:translate(18px,-22px);opacity:.9;}
+    50%{transform:translate(-10px,-40px);opacity:.4;}
+    75%{transform:translate(-24px,-12px);opacity:.85;}
+  }
+  @keyframes fireflyDrift2{
+    0%,100%{transform:translate(0,0);opacity:.35;}
+    30%{transform:translate(-22px,18px);opacity:.9;}
+    60%{transform:translate(14px,32px);opacity:.4;}
+    85%{transform:translate(26px,6px);opacity:.8;}
+  }
+  @keyframes fireflyDrift3{
+    0%,100%{transform:translate(0,0);opacity:.3;}
+    40%{transform:translate(20px,20px);opacity:.85;}
+    70%{transform:translate(-18px,10px);opacity:.5;}
+  }
+
+  .cloud{position:fixed;font-size:32px;opacity:.35;filter:blur(.2px);animation:cloudDrift linear infinite;}
+  .cloud.c1{top:10%;animation-duration:38s;font-size:38px;}
+  .cloud.c2{top:22%;animation-duration:52s;animation-delay:-14s;font-size:26px;opacity:.25;}
+  .cloud.c3{top:6%;animation-duration:46s;animation-delay:-30s;font-size:30px;}
+  @keyframes cloudDrift{
+    from{transform:translateX(-15vw);}
+    to{transform:translateX(115vw);}
+  }
+
+  .bunny{position:fixed;bottom:5%;left:-40px;font-size:24px;animation:bunnyCross 20s linear infinite;}
+  .bunny-body{display:inline-block;animation:bunnyHop .5s ease-in-out infinite;}
+  @keyframes bunnyCross{
+    from{transform:translateX(0);}
+    to{transform:translateX(calc(100vw + 80px));}
+  }
+  @keyframes bunnyHop{
+    0%,100%{transform:translateY(0) scaleY(1);}
+    50%{transform:translateY(-9px) scaleY(1.05);}
+  }
+
+  /* ---------- Hero ---------- */
   .hero{
     z-index:1;
     text-align:center;
@@ -52,10 +100,42 @@
     display:inline-block;
     animation:bob 4s ease-in-out infinite;
     filter:drop-shadow(0 0 20px rgba(255,211,123,.5));
+    position:relative;
+    z-index:1;
   }
   @keyframes bob{
     0%,100%{transform:translateY(0);}
     50%{transform:translateY(-8px);}
+  }
+
+  /* orbiting sparkles around the moon */
+  .orbit-pivot{
+    position:absolute;
+    left:50%; top:84px;
+    width:0; height:0;
+    z-index:0;
+    pointer-events:none;
+  }
+  .orbit-ring{
+    position:absolute; left:0; top:0; width:0; height:0;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+  }
+  .orbit-ring.ring-a{ animation-name:orbitspin; animation-duration:9s; }
+  .orbit-ring.ring-b{ animation-name:orbitspin; animation-duration:15s; animation-direction:reverse; }
+  .orbit-ring.ring-c{ animation-name:orbitspin; animation-duration:21s; }
+  .orbit-item{
+    position:absolute; top:0;
+    transform:translate(-50%,-50%);
+    font-size:15px;
+    filter:drop-shadow(0 0 6px rgba(127,178,255,.6));
+  }
+  .ring-a .orbit-item{ left:64px; font-size:14px; }
+  .ring-b .orbit-item{ left:88px; font-size:17px; }
+  .ring-c .orbit-item{ left:110px; font-size:13px; }
+  @keyframes orbitspin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
   }
 
   .float-icon{
@@ -64,8 +144,8 @@
     z-index:0;
     pointer-events:none;
     will-change:transform;
-    transition:transform .15s ease-out;
-    filter:drop-shadow(0 0 10px rgba(182,166,255,.25));
+    transition:transform .12s ease-out;
+    filter:drop-shadow(0 0 10px rgba(127,178,255,.3));
   }
   .float-icon.i1{ top:6%;  left:4%;  font-size:30px; }
   .float-icon.i2{ top:18%; right:6%; font-size:24px; }
@@ -73,12 +153,17 @@
   .float-icon.i4{ bottom:4%;  right:12%; font-size:26px; }
   .float-icon.i5{ top:46%; left:-2%; font-size:20px; }
   .float-icon.i6{ top:50%; right:-2%; font-size:20px; }
+  .float-icon.i7{ top:2%; left:38%; font-size:18px; }
+  .float-icon.i8{ bottom:-2%; right:34%; font-size:20px; }
+
   h1{
     font-family:'Baloo 2',cursive;
     font-weight:800;
-    font-size:clamp(30px,6vw,46px);
+    font-size:clamp(28px,5.6vw,44px);
     margin:14px 0 10px;
-    text-shadow:0 0 22px rgba(182,166,255,.4);
+    text-shadow:0 0 22px rgba(127,178,255,.45);
+    position:relative;
+    z-index:1;
   }
   .hero p{
     color:var(--muted);
@@ -86,6 +171,8 @@
     font-weight:600;
     line-height:1.6;
     margin:0;
+    position:relative;
+    z-index:1;
   }
 
   .section-label{
@@ -117,7 +204,7 @@
   }
 
   .card{
-    background:linear-gradient(160deg,#241d52,#1c1745);
+    background:linear-gradient(160deg,#16295a,#0f1c3f);
     border:2px solid var(--tile-edge);
     border-radius:22px;
     padding:24px 22px;
@@ -133,7 +220,7 @@
   .card.active:hover{
     transform:translateY(-5px);
     border-color:var(--lavender);
-    box-shadow:0 14px 34px rgba(182,166,255,.22);
+    box-shadow:0 14px 34px rgba(127,178,255,.25);
   }
   .card .icon{
     font-size:36px;
@@ -199,6 +286,20 @@
 
 <div class="stars" id="stars"></div>
 
+<div class="ambient-layer">
+  <span class="firefly f1"></span>
+  <span class="firefly f2"></span>
+  <span class="firefly f3"></span>
+  <span class="firefly f4"></span>
+  <span class="firefly f5"></span>
+
+  <span class="cloud c1">☁️</span>
+  <span class="cloud c2">☁️</span>
+  <span class="cloud c3">☁️</span>
+
+  <span class="bunny"><span class="bunny-body">🐇</span></span>
+</div>
+
 <div class="hero" id="hero">
   <span class="float-icon i1" data-depth="1.4">✨</span>
   <span class="float-icon i2" data-depth="0.8">🦋</span>
@@ -206,6 +307,14 @@
   <span class="float-icon i4" data-depth="0.6">🐾</span>
   <span class="float-icon i5" data-depth="1.6">⭐</span>
   <span class="float-icon i6" data-depth="1.2">💫</span>
+  <span class="float-icon i7" data-depth="1.0">🍃</span>
+  <span class="float-icon i8" data-depth="1.3">✦</span>
+
+  <div class="orbit-pivot">
+    <div class="orbit-ring ring-a"><span class="orbit-item">⭐</span></div>
+    <div class="orbit-ring ring-b"><span class="orbit-item">✨</span></div>
+    <div class="orbit-ring ring-c"><span class="orbit-item">🔷</span></div>
+  </div>
 
   <div class="moon">🌙</div>
   <h1>Chào mừng đến khu vườn của Kiệt Huỳnh</h1>
@@ -223,11 +332,11 @@
   </a>
 
   <a class="card active" href="./games/dom-dom-bay-dem.html">
-  <div class="icon">🐝🌙</div>
-  <h3>Đom Đóm Bay Đêm</h3>
-  <p class="desc">Chạm để bay, né những bụi cây trong đêm. Càng qua nhiều bụi, điểm càng cao.</p>
-  <div class="cta">Chơi ngay</div>
-</a>
+    <div class="icon">🐝🌙</div>
+    <h3>Đom Đóm Bay Đêm</h3>
+    <p class="desc">Chạm để bay, né những bụi cây trong đêm. Càng qua nhiều bụi, điểm càng cao.</p>
+    <div class="cta">Chơi ngay</div>
+  </a>
 
   <div class="card soon">
     <span class="badge">Sắp nở</span>
@@ -237,7 +346,7 @@
   </div>
 </div>
 
-<footer>được chăm sóc bởi Kiet 🌱</footer>
+<footer>được chăm sóc bởi Kiệt Huỳnh 🌱</footer>
 
 <script>
   const wrap = document.getElementById('stars');
@@ -253,7 +362,7 @@
     wrap.appendChild(s);
   }
 
-  // Parallax: icon di chuyển nhẹ theo chuột và theo cuộn trang
+  // Parallax: icon phản ứng mạnh theo chuột và theo cuộn trang
   const icons = document.querySelectorAll('.float-icon');
   const hero = document.getElementById('hero');
   let mouseX = 0, mouseY = 0;
@@ -279,9 +388,11 @@
   function applyTransform(){
     icons.forEach(icon=>{
       const depth = parseFloat(icon.dataset.depth) || 1;
-      const dx = mouseX * 24 * depth;
-      const dy = mouseY * 24 * depth - (scrollFactor * 0.15 * depth);
-      icon.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx*0.5}deg)`;
+      const dx = mouseX * 68 * depth;
+      const dy = mouseY * 68 * depth - (scrollFactor * 0.25 * depth);
+      const rot = mouseX * 30 * depth;
+      const scale = 1 + Math.min(0.25, (Math.abs(mouseX)+Math.abs(mouseY)) * 0.18 * depth);
+      icon.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(${scale})`;
     });
   }
 </script>
