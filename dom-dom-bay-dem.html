@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đom Đóm Bay Đêm 🌙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#151233;
+    --bg-mid:#211c4a;
+    --tile-edge:#3c3280;
+    --lavender:#b6a6ff;
+    --gold:#ffd37b;
+    --pink:#ff9ec4;
+    --cream:#f4efff;
+    --muted:#8d84c2;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #2a2470 0%, transparent 60%),
+      radial-gradient(1000px 700px at 110% 10%, #3a1f5c 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg-deep), var(--bg-mid));
+    color:var(--cream);
+    font-family:'Nunito',sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:24px 14px 40px;
+    overflow-x:hidden;
+  }
+  h1{
+    font-family:'Baloo 2',cursive;
+    font-weight:800;
+    font-size:clamp(24px,5vw,34px);
+    margin:4px 0 2px;
+    text-shadow:0 0 18px rgba(182,166,255,.4);
+  }
+  .subtitle{color:var(--muted);font-weight:600;font-size:13.5px;margin-bottom:16px;text-align:center;}
+
+  .stats{display:flex;gap:16px;margin-bottom:14px;font-family:'Baloo 2',cursive;font-weight:700;}
+  .stat{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--tile-edge);
+    padding:6px 16px;
+    border-radius:14px;
+    font-size:13px;
+    color:var(--lavender);
+    min-width:80px;
+    text-align:center;
+  }
+  .stat span{display:block;color:var(--cream);font-size:17px;margin-top:2px;}
+
+  .game-wrap{
+    position:relative;
+    border-radius:22px;
+    overflow:hidden;
+    border:2px solid var(--tile-edge);
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+  }
+  canvas{
+    display:block;
+    background:linear-gradient(180deg,#1b1640 0%, #241c52 60%, #2a2160 100%);
+    touch-action:none;
+  }
+
+  .overlay{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(12,10,32,.55);
+    text-align:center;
+    padding:20px;
+  }
+  .overlay h2{
+    font-family:'Baloo 2',cursive;
+    color:var(--gold);
+    font-size:24px;
+    margin:6px 0 4px;
+  }
+  .overlay p{color:var(--muted);font-size:13.5px;margin:2px 0 16px;max-width:220px;}
+  .play-btn{
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    background:linear-gradient(135deg,var(--pink),var(--lavender));
+    color:#241c47;
+    border:none;
+    padding:11px 26px;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:14.5px;
+  }
+  .play-btn:hover{filter:brightness(1.06);}
+
+  .footer-tip{margin-top:18px;color:var(--muted);font-size:12.5px;text-align:center;max-width:300px;}
+</style>
+</head>
+<body>
+
+<h1>🐝 Đom Đóm Bay Đêm</h1>
+<div class="subtitle">Chạm hoặc nhấn phím cách để bay, né những bụi cây nhé</div>
+
+<div class="stats">
+  <div class="stat">Điểm<span id="score">0</span></div>
+  <div class="stat">Kỷ lục<span id="best">0</span></div>
+</div>
+
+<div class="game-wrap">
+  <canvas id="game" width="360" height="540"></canvas>
+
+  <div class="overlay" id="startOverlay">
+    <div style="font-size:36px;">🐝✨</div>
+    <h2>Sẵn sàng bay chưa?</h2>
+    <p>Chạm vào màn hình hoặc nhấn phím cách để đom đóm vỗ cánh bay lên</p>
+    <button class="play-btn" id="startBtn">Bắt đầu bay</button>
+  </div>
+
+  <div class="overlay" id="overOverlay" style="display:none;">
+    <div style="font-size:36px;">🌙💫</div>
+    <h2>Đom đóm cần nghỉ rồi</h2>
+    <p id="overText">Điểm của bạn: 0</p>
+    <button class="play-btn" id="retryBtn">Bay lại</button>
+  </div>
+</div>
+
+<div class="footer-tip">Mẹo: nhấn nhẹ và đều tay, đừng bay lên quá gấp nhé 🐾</div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const startOverlay = document.getElementById('startOverlay');
+const overOverlay = document.getElementById('overOverlay');
+const overText = document.getElementById('overText');
+
+let best = parseInt(localStorage.getItem('firefly_best') || '0', 10);
+bestEl.textContent = best;
+
+const GRAVITY = 0.32;
+const FLAP = -6.2;
+const PIPE_GAP = 150;
+const PIPE_WIDTH = 58;
+const PIPE_SPEED = 2.4;
+const PIPE_INTERVAL = 105; // frames between pipes
+
+let bird, pipes, frame, score, running, gameOver, animId, bgFireflies, hillOffset;
+
+function resetGame(){
+  bird = { x: 90, y: H/2, vy: 0, r: 14, wing: 0 };
+  pipes = [];
+  frame = 0;
+  score = 0;
+  running = false;
+  gameOver = false;
+  hillOffset = 0;
+  bgFireflies = [];
+  for(let i=0;i<10;i++){
+    bgFireflies.push({
+      x: Math.random()*W,
+      y: 40 + Math.random()*(H-160),
+      speed: 0.25 + Math.random()*0.4,
+      phase: Math.random()*Math.PI*2,
+      size: 1.5 + Math.random()*1.8
+    });
+  }
+  scoreEl.textContent = '0';
+}
+
+function spawnPipe(){
+  const margin = 60;
+  const gapY = margin + Math.random() * (H - margin*2 - PIPE_GAP);
+  pipes.push({ x: W + 20, gapY, passed:false });
+}
+
+function flap(){
+  if(gameOver) return;
+  if(!running){
+    running = true;
+    startOverlay.style.display = 'none';
+    loop();
+  }
+  bird.vy = FLAP;
+}
+
+function drawBackground(){
+  // moon
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  const moonX = W - 62, moonY = 56;
+  const moonGlow = ctx.createRadialGradient(moonX,moonY,4,moonX,moonY,50);
+  moonGlow.addColorStop(0,'rgba(255,238,190,0.55)');
+  moonGlow.addColorStop(1,'rgba(255,238,190,0)');
+  ctx.fillStyle = moonGlow;
+  ctx.beginPath();
+  ctx.arc(moonX,moonY,50,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#fff3d6';
+  ctx.beginPath();
+  ctx.arc(moonX,moonY,20,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(200,180,255,0.18)';
+  ctx.beginPath();
+  ctx.arc(moonX-6,moonY-4,4.5,0,Math.PI*2);
+  ctx.arc(moonX+5,moonY+7,3,0,Math.PI*2);
+  ctx.arc(moonX+2,moonY-8,2.4,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  // stars
+  ctx.save();
+  for(let i=0;i<28;i++){
+    const sx = (i*47 + frame*0.15) % W;
+    const sy = (i*33) % (H-160) + 10;
+    ctx.globalAlpha = 0.25 + 0.35*Math.abs(Math.sin(i + frame*0.02));
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(sx, sy, 1.4, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // drifting background fireflies
+  ctx.save();
+  bgFireflies.forEach(f=>{
+    f.x -= f.speed;
+    if(f.x < -10) f.x = W + 10;
+    const glowY = f.y + Math.sin(frame*0.03 + f.phase) * 6;
+    const pulse = 0.4 + 0.4*Math.abs(Math.sin(frame*0.05 + f.phase));
+    ctx.globalAlpha = pulse;
+    ctx.fillStyle = '#ffe9a8';
+    ctx.beginPath();
+    ctx.arc(f.x, glowY, f.size, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.restore();
+
+  // parallax hills (far, slow)
+  hillOffset += 0.3;
+  drawHillLayer(hillOffset, H-100, 46, 'rgba(58,49,120,0.55)');
+  // parallax hills (near, faster)
+  drawHillLayer(hillOffset*2.2, H-70, 34, 'rgba(42,35,95,0.7)');
+
+  // ground silhouette with grass + tiny flowers
+  ctx.fillStyle = '#171240';
+  ctx.fillRect(0, H-36, W, 36);
+  ctx.fillStyle = '#1f1a4c';
+  for(let x=-20;x<W+20;x+=34){
+    ctx.beginPath();
+    ctx.moveTo(x, H-36);
+    ctx.lineTo(x+17, H-58);
+    ctx.lineTo(x+34, H-36);
+    ctx.fill();
+  }
+  // grass blades
+  ctx.strokeStyle = 'rgba(182,166,255,0.35)';
+  ctx.lineWidth = 1.4;
+  for(let x=6;x<W;x+=14){
+    const sway = Math.sin(frame*0.05 + x) * 2;
+    ctx.beginPath();
+    ctx.moveTo(x, H-36);
+    ctx.quadraticCurveTo(x+sway, H-46, x+sway*1.5, H-52);
+    ctx.stroke();
+  }
+  // tiny glowing flowers on ground
+  for(let x=20;x<W;x+=53){
+    const bob = Math.sin(frame*0.04 + x) * 1.5;
+    ctx.fillStyle = 'rgba(255,158,196,0.55)';
+    ctx.beginPath();
+    ctx.arc(x, H-40+bob, 2.2, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawHillLayer(offset, baseY, amp, color){
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  const step = 40;
+  for(let x=-step*2; x<=W+step*2; x+=step){
+    const wx = x - (offset % step*2);
+    const y = baseY - Math.sin((wx+offset)*0.02) * amp - amp;
+    ctx.lineTo(wx, y);
+  }
+  ctx.lineTo(W, H);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawPipe(p){
+  const grad = ctx.createLinearGradient(p.x,0,p.x+PIPE_WIDTH,0);
+  grad.addColorStop(0,'#463a94');
+  grad.addColorStop(0.5,'#352c78');
+  grad.addColorStop(1,'#2c2560');
+  ctx.fillStyle = grad;
+
+  // top bush trunk
+  ctx.beginPath();
+  ctx.moveTo(p.x+10, p.gapY - PIPE_GAP/2);
+  ctx.lineTo(p.x+PIPE_WIDTH-10, p.gapY - PIPE_GAP/2);
+  ctx.lineTo(p.x+PIPE_WIDTH-10, 0);
+  ctx.lineTo(p.x+10, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // bottom bush trunk
+  ctx.beginPath();
+  ctx.moveTo(p.x+10, p.gapY + PIPE_GAP/2);
+  ctx.lineTo(p.x+PIPE_WIDTH-10, p.gapY + PIPE_GAP/2);
+  ctx.lineTo(p.x+PIPE_WIDTH-10, H-36);
+  ctx.lineTo(p.x+10, H-36);
+  ctx.closePath();
+  ctx.fill();
+
+  // layered leaf clusters at each cap (3 puffs per side for a fuller bush look)
+  drawLeafCluster(p.x+PIPE_WIDTH/2, p.gapY - PIPE_GAP/2, PIPE_WIDTH, '#4a3d94','#5c4db0');
+  drawLeafCluster(p.x+PIPE_WIDTH/2, p.gapY + PIPE_GAP/2, PIPE_WIDTH, '#4a3d94','#5c4db0');
+
+  // hanging vine dots along the trunk
+  ctx.fillStyle = 'rgba(182,166,255,0.3)';
+  for(let y=10; y<p.gapY - PIPE_GAP/2 - 6; y+=22){
+    ctx.beginPath();
+    ctx.arc(p.x+14, y, 2, 0, Math.PI*2);
+    ctx.fill();
+  }
+  for(let y=p.gapY + PIPE_GAP/2 + 16; y<H-40; y+=22){
+    ctx.beginPath();
+    ctx.arc(p.x+PIPE_WIDTH-14, y, 2, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // small glowing flowers near the gap edges
+  const flowerPulse = 0.5 + 0.4*Math.abs(Math.sin(frame*0.06 + p.x*0.05));
+  ctx.save();
+  ctx.globalAlpha = flowerPulse;
+  ctx.fillStyle = '#ffd37b';
+  ctx.beginPath();
+  ctx.arc(p.x+16, p.gapY - PIPE_GAP/2 - 4, 3, 0, Math.PI*2);
+  ctx.arc(p.x+PIPE_WIDTH-16, p.gapY + PIPE_GAP/2 + 4, 3, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawLeafCluster(cx, cy, width, colorA, colorB){
+  const puffs = [
+    {dx:-width*0.32, dy:-3, r:15},
+    {dx:0,            dy:-9, r:19},
+    {dx: width*0.32, dy:-3, r:15},
+  ];
+  puffs.forEach((puff,i)=>{
+    ctx.fillStyle = i===1 ? colorB : colorA;
+    ctx.beginPath();
+    ctx.ellipse(cx+puff.dx, cy+puff.dy, puff.r, puff.r*0.75, 0, 0, Math.PI*2);
+    ctx.fill();
+  });
+  // little leaf highlights
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.beginPath();
+  ctx.ellipse(cx-4, cy-11, 8, 5, -0.4, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function drawBird(){
+  ctx.save();
+  ctx.translate(bird.x, bird.y);
+  const angle = Math.max(-0.4, Math.min(0.9, bird.vy * 0.08));
+  ctx.rotate(angle);
+
+  // glow
+  ctx.beginPath();
+  ctx.fillStyle = 'rgba(255,211,123,0.35)';
+  ctx.arc(0,0, bird.r+9, 0, Math.PI*2);
+  ctx.fill();
+
+  // body
+  ctx.beginPath();
+  ctx.fillStyle = '#ffd37b';
+  ctx.ellipse(0,0, bird.r, bird.r*0.8, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // wing
+  const wingFlap = Math.sin(bird.wing) * 8;
+  ctx.beginPath();
+  ctx.fillStyle = '#fff1cf';
+  ctx.ellipse(-4, wingFlap*0.2 - 2, 9, 5, -0.3, 0, Math.PI*2);
+  ctx.fill();
+
+  // eye
+  ctx.beginPath();
+  ctx.fillStyle = '#241c47';
+  ctx.arc(6,-3, 2.2, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function update(){
+  frame++;
+  bird.vy += GRAVITY;
+  bird.y += bird.vy;
+  bird.wing += 0.35;
+
+  if(frame % PIPE_INTERVAL === 0){
+    spawnPipe();
+  }
+
+  pipes.forEach(p => p.x -= PIPE_SPEED);
+  pipes = pipes.filter(p => p.x > -PIPE_WIDTH-10);
+
+  pipes.forEach(p=>{
+    if(!p.passed && p.x + PIPE_WIDTH < bird.x - bird.r){
+      p.passed = true;
+      score++;
+      scoreEl.textContent = score;
+    }
+  });
+
+  // collisions
+  if(bird.y + bird.r > H-36 || bird.y - bird.r < 0){
+    endGame();
+    return;
+  }
+  for(const p of pipes){
+    const inX = bird.x + bird.r > p.x && bird.x - bird.r < p.x + PIPE_WIDTH;
+    if(inX){
+      const inGap = bird.y - bird.r > p.gapY - PIPE_GAP/2 && bird.y + bird.r < p.gapY + PIPE_GAP/2;
+      if(!inGap){
+        endGame();
+        return;
+      }
+    }
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  drawBackground();
+  pipes.forEach(drawPipe);
+  drawBird();
+}
+
+function loop(){
+  if(gameOver) return;
+  update();
+  draw();
+  animId = requestAnimationFrame(loop);
+}
+
+function endGame(){
+  gameOver = true;
+  running = false;
+  cancelAnimationFrame(animId);
+  if(score > best){
+    best = score;
+    localStorage.setItem('firefly_best', best);
+    bestEl.textContent = best;
+  }
+  overText.textContent = 'Điểm của bạn: ' + score;
+  overOverlay.style.display = 'flex';
+}
+
+document.getElementById('startBtn').addEventListener('click', flap);
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  overOverlay.style.display = 'none';
+  resetGame();
+  draw();
+  flap();
+});
+
+canvas.addEventListener('pointerdown', (e)=>{ e.preventDefault(); flap(); });
+window.addEventListener('keydown', (e)=>{
+  if(e.code === 'Space'){ e.preventDefault(); flap(); }
+});
+
+resetGame();
+draw();
+</script>
+</body>
+</html>
