@@ -101,7 +101,7 @@
 </head>
 <body>
 
-<div style="width:360px;max-width:100%;margin-bottom:8px;"><button onclick="history.back()" style="padding:8px 14px;border-radius:10px;border:none;cursor:pointer;">← Quay về</button></div>
+<button onclick="history.back()" style="position:fixed;top:18px;left:18px;width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);color:white;font-size:22px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);">←</button>
 <h1>🐝 Đom Đóm Bay Đêm</h1>
 <div class="subtitle">Chạm hoặc nhấn phím cách để bay, né những bụi cây nhé</div>
 
@@ -144,12 +144,12 @@ const overText = document.getElementById('overText');
 let best = parseInt(localStorage.getItem('firefly_best') || '0', 10);
 bestEl.textContent = best;
 
-const GRAVITY = 0.32;
-const FLAP = -6.2;
+const GRAVITY = 0.24;
+const FLAP = -5.0;
 const PIPE_GAP = 150;
 const PIPE_WIDTH = 58;
-const PIPE_SPEED = 1.6; // slower
-const PIPE_INTERVAL = 105; // frames between pipes
+const PIPE_SPEED = 1.0; // much slower
+const PIPE_INTERVAL = 150; // frames between pipes
 
 let bird, pipes, frame, score, running, gameOver, animId, bgFireflies, hillOffset;
 
