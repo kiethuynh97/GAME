@@ -8,15 +8,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep:#151233;
-    --bg-mid:#211c4a;
-    --tile:#2c2560;
-    --tile-edge:#3c3280;
-    --lavender:#b6a6ff;
+    --bg-deep:#0a0f28;
+    --bg-mid:#0f1c3f;
+    --tile:#152a52;
+    --tile-edge:#2c4d8c;
+    --lavender:#7fb2ff;
     --gold:#ffd37b;
-    --pink:#ff9ec4;
-    --cream:#f4efff;
-    --muted:#8d84c2;
+    --pink:#5fd6e8;
+    --cream:#eaf1ff;
+    --muted:#6f89bd;
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -24,8 +24,8 @@
     margin:0;
     min-height:100vh;
     background:
-      radial-gradient(1200px 600px at 15% -10%, #2a2470 0%, transparent 60%),
-      radial-gradient(1000px 700px at 110% 10%, #3a1f5c 0%, transparent 55%),
+      radial-gradient(1200px 600px at 15% -10%, #17297a 0%, transparent 60%),
+      radial-gradient(1000px 700px at 110% 10%, #0e3a70 0%, transparent 55%),
       linear-gradient(180deg, var(--bg-deep), var(--bg-mid));
     color:var(--cream);
     font-family:'Nunito',sans-serif;
@@ -40,6 +40,38 @@
   .stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
   .star{position:absolute;background:#fff;border-radius:50%;opacity:.5;animation:twinkle 3s ease-in-out infinite;}
   @keyframes twinkle{0%,100%{opacity:.15;}50%{opacity:.8;}}
+
+  /* ambient fireflies + clouds, always animating */
+  .ambient-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  .firefly{position:fixed;border-radius:50%;background:#ffe9a8;box-shadow:0 0 10px 3px rgba(255,233,168,.55);opacity:.75;}
+  .firefly.f1{width:5px;height:5px;top:16%;left:8%;animation:fireflyDrift1 9s ease-in-out infinite;}
+  .firefly.f2{width:4px;height:4px;top:55%;left:85%;animation:fireflyDrift2 11s ease-in-out infinite;}
+  .firefly.f3{width:6px;height:6px;top:78%;left:12%;animation:fireflyDrift3 8s ease-in-out infinite;}
+  .firefly.f4{width:4px;height:4px;top:30%;left:90%;animation:fireflyDrift1 12s ease-in-out infinite reverse;}
+  @keyframes fireflyDrift1{
+    0%,100%{transform:translate(0,0);opacity:.3;}
+    25%{transform:translate(18px,-22px);opacity:.9;}
+    50%{transform:translate(-10px,-40px);opacity:.4;}
+    75%{transform:translate(-24px,-12px);opacity:.85;}
+  }
+  @keyframes fireflyDrift2{
+    0%,100%{transform:translate(0,0);opacity:.35;}
+    30%{transform:translate(-22px,18px);opacity:.9;}
+    60%{transform:translate(14px,32px);opacity:.4;}
+    85%{transform:translate(26px,6px);opacity:.8;}
+  }
+  @keyframes fireflyDrift3{
+    0%,100%{transform:translate(0,0);opacity:.3;}
+    40%{transform:translate(20px,20px);opacity:.85;}
+    70%{transform:translate(-18px,10px);opacity:.5;}
+  }
+  .cloud{position:fixed;font-size:30px;opacity:.3;animation:cloudDrift linear infinite;}
+  .cloud.c1{top:8%;animation-duration:40s;}
+  .cloud.c2{top:20%;animation-duration:54s;animation-delay:-16s;font-size:24px;opacity:.22;}
+  @keyframes cloudDrift{
+    from{transform:translateX(-15vw);}
+    to{transform:translateX(115vw);}
+  }
 
   h1{
     font-family:'Baloo 2',cursive;
@@ -123,7 +155,7 @@
     font-size:34px;
   }
   .face.back{
-    background:linear-gradient(155deg,var(--tile),#221c4a);
+    background:linear-gradient(155deg,var(--tile),#0e1c3d);
     border:2px solid var(--tile-edge);
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.03), 0 6px 14px rgba(0,0,0,.35);
   }
@@ -134,12 +166,12 @@
     font-size:20px;
   }
   .face.front{
-    background:radial-gradient(circle at 35% 30%, #3a2f78, #241d52 70%);
+    background:radial-gradient(circle at 35% 30%, #234280, #132552 70%);
     border:2px solid var(--tile-edge);
     transform:rotateY(180deg);
   }
   .tile.matched .face.front{
-    background:radial-gradient(circle at 35% 30%, #4a3d8f, #2c2560 70%);
+    background:radial-gradient(circle at 35% 30%, #2f5498, #16295a 70%);
     border-color:var(--gold);
     box-shadow:0 0 22px rgba(255,211,123,.45);
   }
@@ -161,6 +193,29 @@
 
   .footer-tip{margin-top:22px;color:var(--muted);font-size:13px;z-index:1;text-align:center;max-width:320px;}
 
+  .back-btn{
+    position:fixed;
+    top:16px; left:16px;
+    z-index:5;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:13px;
+    color:var(--cream);
+    background:rgba(255,255,255,.05);
+    border:2px solid var(--tile-edge);
+    padding:8px 14px;
+    border-radius:999px;
+    text-decoration:none;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .back-btn:hover{
+    transform:translateX(-3px);
+    border-color:var(--lavender);
+  }
+
   .overlay{
     position:fixed;inset:0;
     background:rgba(10,8,30,.72);
@@ -172,7 +227,7 @@
   }
   .overlay.show{display:flex;}
   .win-card{
-    background:linear-gradient(160deg,#241d52,#1a1640);
+    background:linear-gradient(160deg,#16295a,#0d1938);
     border:2px solid var(--tile-edge);
     border-radius:24px;
     padding:34px 30px;
@@ -209,11 +264,34 @@
     0%,100%{transform:translateY(0) rotate(0deg);opacity:.5;}
     50%{transform:translateY(-8px) rotate(15deg);opacity:1;}
   }
+
+  .burst-particle{
+    position:fixed;
+    font-size:14px;
+    pointer-events:none;
+    z-index:20;
+    animation:burstOut .7s ease-out forwards;
+  }
+  @keyframes burstOut{
+    0%{transform:translate(0,0) scale(1);opacity:1;}
+    100%{transform:translate(var(--bx),var(--by)) scale(.4);opacity:0;}
+  }
 </style>
 </head>
 <body>
 
 <div class="stars" id="stars"></div>
+
+<div class="ambient-layer">
+  <span class="firefly f1"></span>
+  <span class="firefly f2"></span>
+  <span class="firefly f3"></span>
+  <span class="firefly f4"></span>
+  <span class="cloud c1">☁️</span>
+  <span class="cloud c2">☁️</span>
+</div>
+
+<a class="back-btn" href="../index.html">← Về vườn</a>
 
 <h1>🌙 Vườn Trăng Ngủ</h1>
 <div class="subtitle">Lật ô, tìm hai bạn thú ngủ giống nhau nhé</div>
@@ -353,6 +431,8 @@ function onTileClick(tile){
       setTimeout(()=>{
         a.classList.add('matched');
         b.classList.add('matched');
+        spawnBurst(a);
+        spawnBurst(b);
         matchedCount++;
         remainingEl.textContent = pairsCount - matchedCount;
         flipped = [];
@@ -370,6 +450,27 @@ function onTileClick(tile){
         lockBoard = false;
       },800);
     }
+  }
+}
+
+function spawnBurst(tile){
+  const rect = tile.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  const glyphs = ['✦','✧','⭐','💫'];
+  for(let i=0;i<6;i++){
+    const p = document.createElement('div');
+    p.className = 'burst-particle';
+    p.textContent = glyphs[Math.floor(Math.random()*glyphs.length)];
+    const angle = (Math.PI*2/6)*i + Math.random()*0.4;
+    const dist = 40 + Math.random()*20;
+    p.style.setProperty('--bx', Math.cos(angle)*dist + 'px');
+    p.style.setProperty('--by', Math.sin(angle)*dist + 'px');
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    p.style.color = Math.random() > 0.5 ? 'var(--gold)' : 'var(--lavender)';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 750);
   }
 }
 
