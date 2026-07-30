@@ -8,14 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep:#151233;
-    --bg-mid:#211c4a;
-    --tile-edge:#3c3280;
-    --lavender:#b6a6ff;
+    --bg-deep:#0a0f28;
+    --bg-mid:#0f1c3f;
+    --tile-edge:#2c4d8c;
+    --lavender:#7fb2ff;
     --gold:#ffd37b;
-    --pink:#ff9ec4;
-    --cream:#f4efff;
-    --muted:#8d84c2;
+    --pink:#5fd6e8;
+    --cream:#eaf1ff;
+    --muted:#6f89bd;
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -23,8 +23,8 @@
     margin:0;
     min-height:100vh;
     background:
-      radial-gradient(1200px 600px at 15% -10%, #2a2470 0%, transparent 60%),
-      radial-gradient(1000px 700px at 110% 10%, #3a1f5c 0%, transparent 55%),
+      radial-gradient(1200px 600px at 15% -10%, #17297a 0%, transparent 60%),
+      radial-gradient(1000px 700px at 110% 10%, #0e3a70 0%, transparent 55%),
       linear-gradient(180deg, var(--bg-deep), var(--bg-mid));
     color:var(--cream);
     font-family:'Nunito',sans-serif;
@@ -65,7 +65,7 @@
   }
   canvas{
     display:block;
-    background:linear-gradient(180deg,#1b1640 0%, #241c52 60%, #2a2160 100%);
+    background:linear-gradient(180deg,#0d1938 0%, #14275a 60%, #17307a 100%);
     touch-action:none;
   }
 
@@ -97,11 +97,35 @@
   .play-btn:hover{filter:brightness(1.06);}
 
   .footer-tip{margin-top:18px;color:var(--muted);font-size:12.5px;text-align:center;max-width:300px;}
+
+  .back-btn{
+    position:fixed;
+    top:16px; left:16px;
+    z-index:5;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:13px;
+    color:var(--cream);
+    background:rgba(255,255,255,.05);
+    border:2px solid var(--tile-edge);
+    padding:8px 14px;
+    border-radius:999px;
+    text-decoration:none;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .back-btn:hover{
+    transform:translateX(-3px);
+    border-color:var(--lavender);
+  }
 </style>
 </head>
 <body>
 
-<button onclick="history.back()" style="position:fixed;top:18px;left:18px;width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);color:white;font-size:22px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);">←</button>
+<a class="back-btn" href="../index.html">← Về vườn</a>
+
 <h1>🐝 Đom Đóm Bay Đêm</h1>
 <div class="subtitle">Chạm hoặc nhấn phím cách để bay, né những bụi cây nhé</div>
 
@@ -144,14 +168,14 @@ const overText = document.getElementById('overText');
 let best = parseInt(localStorage.getItem('firefly_best') || '0', 10);
 bestEl.textContent = best;
 
-const GRAVITY = 0.24;
-const FLAP = -5.0;
+const GRAVITY = 0.32;
+const FLAP = -6.2;
 const PIPE_GAP = 150;
 const PIPE_WIDTH = 58;
-const PIPE_SPEED = 1.0; // much slower
-const PIPE_INTERVAL = 150; // frames between pipes
+const PIPE_SPEED = 2.4;
+const PIPE_INTERVAL = 105; // frames between pipes
 
-let bird, pipes, frame, score, running, gameOver, animId, bgFireflies, hillOffset;
+let bird, pipes, frame, score, running, gameOver, animId, bgFireflies, hillOffset, birdTrail;
 
 function resetGame(){
   bird = { x: 90, y: H/2, vy: 0, r: 14, wing: 0 };
@@ -161,12 +185,13 @@ function resetGame(){
   running = false;
   gameOver = false;
   hillOffset = 0;
+  birdTrail = [];
   bgFireflies = [];
   for(let i=0;i<10;i++){
     bgFireflies.push({
       x: Math.random()*W,
       y: 40 + Math.random()*(H-160),
-      speed: 0.08 + Math.random()*0.18,
+      speed: 0.25 + Math.random()*0.4,
       phase: Math.random()*Math.PI*2,
       size: 1.5 + Math.random()*1.8
     });
@@ -244,14 +269,14 @@ function drawBackground(){
 
   // parallax hills (far, slow)
   hillOffset += 0.3;
-  drawHillLayer(hillOffset, H-100, 46, 'rgba(58,49,120,0.55)');
+  drawHillLayer(hillOffset, H-100, 46, 'rgba(30,58,130,0.55)');
   // parallax hills (near, faster)
-  drawHillLayer(hillOffset*2.2, H-70, 34, 'rgba(42,35,95,0.7)');
+  drawHillLayer(hillOffset*2.2, H-70, 34, 'rgba(20,40,95,0.7)');
 
   // ground silhouette with grass + tiny flowers
-  ctx.fillStyle = '#171240';
+  ctx.fillStyle = '#0c1633';
   ctx.fillRect(0, H-36, W, 36);
-  ctx.fillStyle = '#1f1a4c';
+  ctx.fillStyle = '#122a54';
   for(let x=-20;x<W+20;x+=34){
     ctx.beginPath();
     ctx.moveTo(x, H-36);
@@ -260,7 +285,7 @@ function drawBackground(){
     ctx.fill();
   }
   // grass blades
-  ctx.strokeStyle = 'rgba(182,166,255,0.35)';
+  ctx.strokeStyle = 'rgba(127,178,255,0.35)';
   ctx.lineWidth = 1.4;
   for(let x=6;x<W;x+=14){
     const sway = Math.sin(frame*0.05 + x) * 2;
@@ -272,7 +297,7 @@ function drawBackground(){
   // tiny glowing flowers on ground
   for(let x=20;x<W;x+=53){
     const bob = Math.sin(frame*0.04 + x) * 1.5;
-    ctx.fillStyle = 'rgba(255,158,196,0.55)';
+    ctx.fillStyle = 'rgba(95,214,232,0.55)';
     ctx.beginPath();
     ctx.arc(x, H-40+bob, 2.2, 0, Math.PI*2);
     ctx.fill();
@@ -296,9 +321,9 @@ function drawHillLayer(offset, baseY, amp, color){
 
 function drawPipe(p){
   const grad = ctx.createLinearGradient(p.x,0,p.x+PIPE_WIDTH,0);
-  grad.addColorStop(0,'#463a94');
-  grad.addColorStop(0.5,'#352c78');
-  grad.addColorStop(1,'#2c2560');
+  grad.addColorStop(0,'#2f5aa8');
+  grad.addColorStop(0.5,'#234488');
+  grad.addColorStop(1,'#152a52');
   ctx.fillStyle = grad;
 
   // top bush trunk
@@ -320,11 +345,11 @@ function drawPipe(p){
   ctx.fill();
 
   // layered leaf clusters at each cap (3 puffs per side for a fuller bush look)
-  drawLeafCluster(p.x+PIPE_WIDTH/2, p.gapY - PIPE_GAP/2, PIPE_WIDTH, '#4a3d94','#5c4db0');
-  drawLeafCluster(p.x+PIPE_WIDTH/2, p.gapY + PIPE_GAP/2, PIPE_WIDTH, '#4a3d94','#5c4db0');
+  drawLeafCluster(p.x+PIPE_WIDTH/2, p.gapY - PIPE_GAP/2, PIPE_WIDTH, '#2e5296','#3f6db8');
+  drawLeafCluster(p.x+PIPE_WIDTH/2, p.gapY + PIPE_GAP/2, PIPE_WIDTH, '#2e5296','#3f6db8');
 
   // hanging vine dots along the trunk
-  ctx.fillStyle = 'rgba(182,166,255,0.3)';
+  ctx.fillStyle = 'rgba(127,178,255,0.35)';
   for(let y=10; y<p.gapY - PIPE_GAP/2 - 6; y+=22){
     ctx.beginPath();
     ctx.arc(p.x+14, y, 2, 0, Math.PI*2);
@@ -365,6 +390,20 @@ function drawLeafCluster(cx, cy, width, colorA, colorB){
   ctx.beginPath();
   ctx.ellipse(cx-4, cy-11, 8, 5, -0.4, 0, Math.PI*2);
   ctx.fill();
+}
+
+function drawBirdTrail(){
+  birdTrail.push({x:bird.x, y:bird.y});
+  if(birdTrail.length > 10) birdTrail.shift();
+  birdTrail.forEach((pt,i)=>{
+    const t = i / birdTrail.length;
+    ctx.globalAlpha = t * 0.35;
+    ctx.fillStyle = '#ffd37b';
+    ctx.beginPath();
+    ctx.arc(pt.x - 6, pt.y, bird.r * t * 0.7, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
 }
 
 function drawBird(){
@@ -443,6 +482,7 @@ function draw(){
   ctx.clearRect(0,0,W,H);
   drawBackground();
   pipes.forEach(drawPipe);
+  drawBirdTrail();
   drawBird();
 }
 
