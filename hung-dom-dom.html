@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hứng Đom Đóm 🌙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0a0f28;
+    --bg-mid:#0f1c3f;
+    --tile-edge:#2c4d8c;
+    --lavender:#7fb2ff;
+    --gold:#ffd37b;
+    --pink:#5fd6e8;
+    --cream:#eaf1ff;
+    --muted:#6f89bd;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #17297a 0%, transparent 60%),
+      radial-gradient(1000px 700px at 110% 10%, #0e3a70 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg-deep), var(--bg-mid));
+    color:var(--cream);
+    font-family:'Nunito',sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:24px 14px 40px;
+    overflow-x:hidden;
+  }
+  h1{
+    font-family:'Baloo 2',cursive;
+    font-weight:800;
+    font-size:clamp(24px,5vw,34px);
+    margin:4px 0 2px;
+    text-shadow:0 0 18px rgba(127,178,255,.4);
+  }
+  .subtitle{color:var(--muted);font-weight:600;font-size:13.5px;margin-bottom:16px;text-align:center;max-width:320px;}
+
+  .stats{display:flex;gap:16px;margin-bottom:14px;font-family:'Baloo 2',cursive;font-weight:700;}
+  .stat{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--tile-edge);
+    padding:6px 16px;
+    border-radius:14px;
+    font-size:13px;
+    color:var(--lavender);
+    min-width:80px;
+    text-align:center;
+  }
+  .stat span{display:block;color:var(--cream);font-size:17px;margin-top:2px;}
+
+  .game-wrap{
+    position:relative;
+    border-radius:22px;
+    overflow:hidden;
+    border:2px solid var(--tile-edge);
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+    background:#0d1938;
+  }
+  canvas{ display:block; touch-action:none; }
+  #video{ display:none; }
+
+  .overlay{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(8,10,28,.72);
+    text-align:center;
+    padding:24px;
+    gap:4px;
+  }
+  .overlay h2{
+    font-family:'Baloo 2',cursive;
+    color:var(--gold);
+    font-size:22px;
+    margin:6px 0 4px;
+  }
+  .overlay p{color:var(--muted);font-size:13px;margin:2px 0 14px;max-width:260px;line-height:1.5;}
+  .play-btn{
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    background:linear-gradient(135deg,var(--pink),var(--lavender));
+    color:#0a1230;
+    border:none;
+    padding:11px 26px;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:14.5px;
+  }
+  .play-btn:hover{filter:brightness(1.06);}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:10px;}
+
+  .footer-tip{margin-top:18px;color:var(--muted);font-size:12.5px;text-align:center;max-width:320px;}
+
+  .back-btn{
+    position:fixed;
+    top:16px; left:16px;
+    z-index:5;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:13px;
+    color:var(--cream);
+    background:rgba(255,255,255,.05);
+    border:2px solid var(--tile-edge);
+    padding:8px 14px;
+    border-radius:999px;
+    text-decoration:none;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .back-btn:hover{ transform:translateX(-3px); border-color:var(--lavender); }
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="./index.html">← Về vườn</a>
+
+<h1>🌙✨ Hứng Đom Đóm</h1>
+<div class="subtitle">Dùng camera — vẫy tay hoặc di chuyển trước màn hình để hứng đom đóm rơi xuống</div>
+
+<div class="stats">
+  <div class="stat">Điểm<span id="score">0</span></div>
+  <div class="stat">Bỏ lỡ<span id="missed">0</span></div>
+</div>
+
+<div class="game-wrap">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="game" width="360" height="480"></canvas>
+
+  <div class="overlay" id="startOverlay">
+    <div style="font-size:36px;">📷✨</div>
+    <h2>Cho phép dùng camera nhé</h2>
+    <p>Game cần quyền truy cập camera để nhận diện chuyển động của bạn. Không có hình ảnh nào được lưu lại hay gửi đi đâu cả — mọi thứ xử lý ngay trên máy bạn.</p>
+    <button class="play-btn" id="startBtn">Bật camera & chơi</button>
+    <div class="hint" id="hintText"></div>
+  </div>
+
+  <div class="overlay" id="overOverlay" style="display:none;">
+    <div style="font-size:36px;">🌙💫</div>
+    <h2>Hết giờ rồi!</h2>
+    <p id="overText">Điểm của bạn: 0</p>
+    <button class="play-btn" id="retryBtn">Chơi lại</button>
+  </div>
+</div>
+
+<div class="footer-tip">Mẹo: đứng cách camera khoảng 50-80cm, phòng đủ sáng sẽ nhận chuyển động tốt hơn 🐾</div>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+const scoreEl = document.getElementById('score');
+const missedEl = document.getElementById('missed');
+const startOverlay = document.getElementById('startOverlay');
+const overOverlay = document.getElementById('overOverlay');
+const overText = document.getElementById('overText');
+const startBtn = document.getElementById('startBtn');
+const hintText = document.getElementById('hintText');
+
+// low-res offscreen canvas for motion detection (cheap to process)
+const MW = 48, MH = 64;
+const motionCanvas = document.createElement('canvas');
+motionCanvas.width = MW; motionCanvas.height = MH;
+const mctx = motionCanvas.getContext('2d', { willReadFrequently: true });
+let prevFrame = null;
+
+let fireflies = [];
+let particles = [];
+let score = 0, missed = 0;
+let timeLeft = 45;
+let running = false;
+let animId = null;
+let frame = 0;
+
+function resetGame(){
+  fireflies = [];
+  particles = [];
+  score = 0; missed = 0; timeLeft = 45;
+  frame = 0;
+  scoreEl.textContent = '0';
+  missedEl.textContent = '0';
+}
+
+function spawnFirefly(){
+  fireflies.push({
+    x: 20 + Math.random()*(W-40),
+    y: -10,
+    speed: 0.9 + Math.random()*1.1,
+    size: 5 + Math.random()*3,
+    sway: Math.random()*Math.PI*2,
+    caught: false
+  });
+}
+
+async function startCamera(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'user' }, audio:false });
+    video.srcObject = stream;
+    await video.play();
+    startOverlay.style.display = 'none';
+    resetGame();
+    running = true;
+    countdownTimer();
+    loop();
+  }catch(err){
+    hintText.textContent = 'Không mở được camera — kiểm tra quyền truy cập trong trình duyệt nhé.';
+  }
+}
+
+function countdownTimer(){
+  const t = setInterval(()=>{
+    if(!running){ clearInterval(t); return; }
+    timeLeft--;
+    if(timeLeft <= 0){
+      clearInterval(t);
+      endGame();
+    }
+  },1000);
+}
+
+function getMotionMask(){
+  // mirror-draw the current video frame at low resolution
+  mctx.save();
+  mctx.translate(MW,0);
+  mctx.scale(-1,1);
+  mctx.drawImage(video, 0, 0, MW, MH);
+  mctx.restore();
+  const frameData = mctx.getImageData(0,0,MW,MH).data;
+
+  // grayscale
+  const gray = new Uint8ClampedArray(MW*MH);
+  for(let i=0;i<MW*MH;i++){
+    const o = i*4;
+    gray[i] = (frameData[o]*0.3 + frameData[o+1]*0.59 + frameData[o+2]*0.11);
+  }
+
+  let mask = null;
+  if(prevFrame){
+    mask = new Uint8ClampedArray(MW*MH);
+    for(let i=0;i<MW*MH;i++){
+      const diff = Math.abs(gray[i]-prevFrame[i]);
+      mask[i] = diff > 28 ? 1 : 0;
+    }
+  }
+  prevFrame = gray;
+  return mask;
+}
+
+function isMotionAt(px, py, mask){
+  if(!mask) return false;
+  const mx = Math.floor((px/W)*MW);
+  const my = Math.floor((py/H)*MH);
+  let hits = 0;
+  for(let dx=-1;dx<=1;dx++){
+    for(let dy=-1;dy<=1;dy++){
+      const x = mx+dx, y = my+dy;
+      if(x<0||y<0||x>=MW||y>=MH) continue;
+      if(mask[y*MW+x]) hits++;
+    }
+  }
+  return hits >= 2;
+}
+
+function spawnCatchParticles(x,y){
+  const glyphs = ['✨','⭐','💫'];
+  for(let i=0;i<5;i++){
+    const angle = Math.random()*Math.PI*2;
+    const dist = 16 + Math.random()*14;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle)*dist/20,
+      vy: Math.sin(angle)*dist/20,
+      life: 26,
+      glyph: glyphs[Math.floor(Math.random()*glyphs.length)]
+    });
+  }
+}
+
+function update(mask){
+  frame++;
+  if(frame % 55 === 0) spawnFirefly();
+
+  fireflies.forEach(f=>{
+    if(f.caught) return;
+    f.y += f.speed;
+    f.x += Math.sin(frame*0.05 + f.sway) * 0.6;
+
+    if(isMotionAt(f.x, f.y, mask)){
+      f.caught = true;
+      score++;
+      scoreEl.textContent = score;
+      spawnCatchParticles(f.x, f.y);
+    } else if(f.y > H+10){
+      f.caught = true;
+      missed++;
+      missedEl.textContent = missed;
+    }
+  });
+  fireflies = fireflies.filter(f => !f.caught || particles.length);
+  fireflies = fireflies.filter(f => f.y < H+20 && !(f.caught));
+
+  particles.forEach(p=>{
+    p.x += p.vx; p.y += p.vy; p.life--;
+  });
+  particles = particles.filter(p => p.life > 0);
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  // mirrored dim video background
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  ctx.translate(W,0);
+  ctx.scale(-1,1);
+  ctx.drawImage(video, 0, 0, W, H);
+  ctx.restore();
+
+  // dark tint overlay for contrast
+  ctx.fillStyle = 'rgba(8,12,32,0.4)';
+  ctx.fillRect(0,0,W,H);
+
+  // fireflies
+  fireflies.forEach(f=>{
+    const glow = ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,f.size*3);
+    glow.addColorStop(0,'rgba(255,211,123,0.9)');
+    glow.addColorStop(1,'rgba(255,211,123,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.size*3,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffe9a8';
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.size,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // catch particles
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'center';
+  particles.forEach(p=>{
+    ctx.globalAlpha = Math.max(0, p.life/26);
+    ctx.fillText(p.glyph, p.x, p.y);
+  });
+  ctx.globalAlpha = 1;
+
+  // timer bar
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(0,0,W,6);
+  ctx.fillStyle = '#7fb2ff';
+  ctx.fillRect(0,0, W*(timeLeft/45), 6);
+}
+
+function loop(){
+  if(!running) return;
+  const mask = video.readyState >= 2 ? getMotionMask() : null;
+  update(mask);
+  draw();
+  animId = requestAnimationFrame(loop);
+}
+
+function endGame(){
+  running = false;
+  cancelAnimationFrame(animId);
+  overText.textContent = `Bạn hứng được ${score} đom đóm, bỏ lỡ ${missed} bạn`;
+  overOverlay.style.display = 'flex';
+}
+
+startBtn.addEventListener('click', startCamera);
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  overOverlay.style.display = 'none';
+  resetGame();
+  running = true;
+  countdownTimer();
+  loop();
+});
+</script>
+</body>
+</html>
