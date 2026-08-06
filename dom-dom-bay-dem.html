@@ -168,12 +168,17 @@ const overText = document.getElementById('overText');
 let best = parseInt(localStorage.getItem('firefly_best') || '0', 10);
 bestEl.textContent = best;
 
-const GRAVITY = 0.32;
-const FLAP = -6.2;
-const PIPE_GAP = 150;
+const GRAVITY = 0.24;
+
+const FLAP = -5.4;
+
+const PIPE_GAP = 170;
+
 const PIPE_WIDTH = 58;
-const PIPE_SPEED = 2.4;
-const PIPE_INTERVAL = 105; // frames between pipes
+
+const PIPE_SPEED = 1.5;
+
+const PIPE_INTERVAL = 140; // frames between pipes
 
 let bird, pipes, frame, score, running, gameOver, animId, bgFireflies, hillOffset, birdTrail;
 
