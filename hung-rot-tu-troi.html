@@ -65,7 +65,7 @@
     box-shadow:0 20px 50px rgba(0,0,0,.4);
     touch-action:none;
   }
-  canvas{ display:block; background:linear-gradient(180deg,#0d1938 0%, #14275a 100%); }
+  canvas{ display:block; width:min(520px, 90vw); height:min(520px, 90vw); background:linear-gradient(180deg,#0d1938 0%, #14275a 100%); }
 
   .overlay{
     position:absolute;inset:0;
@@ -121,7 +121,7 @@
 
 <a class="back-btn" href="./index.html">← Về vườn</a>
 
-<h1>Hứng 💩 Rơi Từ Trời 😂</h1>
+<h1>💩 Hứng Rơi Từ Trời 😂</h1>
 <div class="subtitle">Di chuyển nhân vật (rê chuột / chạm / phím trái-phải) để hứng, né bịch nào thối quá nha!</div>
 
 <div class="stats">
@@ -131,11 +131,11 @@
 </div>
 
 <div class="game-wrap">
-  <canvas id="game" width="360" height="500"></canvas>
+  <canvas id="game" width="520" height="520"></canvas>
 
   <div class="overlay" id="startOverlay">
     <div style="font-size:38px;">💩🪣</div>
-    <h2>Sẵn sàng hứng 💩 chưa?</h2>
+    <h2>Sẵn sàng hứng chưa?</h2>
     <p>Hứng 💩 để ăn điểm, hứng 💎✨ để nhân đôi combo. Lỡ hứng 🦨 hôi quá thì mất 1 mạng đó!</p>
     <button class="play-btn" id="startBtn">Bắt đầu hứng</button>
   </div>
